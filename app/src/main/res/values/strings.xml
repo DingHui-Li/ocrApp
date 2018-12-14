@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">ocrapp</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string-array name="targetLanguage">
+        <item >中文</item>
+        <item >英文</item>
+    </string-array>
+    <string-array name="dataSource">
+        <item >opencv</item>
+        <item >百度Api</item>
+    </string-array>
+</resources>
