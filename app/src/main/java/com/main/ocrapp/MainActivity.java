@@ -611,6 +611,18 @@ public class MainActivity extends AppCompatActivity
         });
 
     }
+    public void aboutViewInit(){
+       final TextView tv=findViewById(R.id.textView6);
+        tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setData(Uri.parse(tv.getText()+""));
+                intent.setAction("android.intent.action.VIEW");
+                startActivity(intent);
+            }
+        });
+    }
     public void writeConfigFile(){
         Map<String,String> var=new HashMap<>();
         var.put("ip",ip);
@@ -803,6 +815,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_about) {
             tb.setTitle("关于");
             switch_view(views,findViewById(R.id.include_about));
+            aboutViewInit();
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
