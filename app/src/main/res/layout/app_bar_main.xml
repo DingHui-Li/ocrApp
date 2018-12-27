@@ -30,29 +30,19 @@
             </android.support.v7.widget.Toolbar>
 
             <TextView
-                android:id="@+id/selectNum"
+                android:id="@+id/clearHis"
                 android:layout_width="49dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginRight="10dp"
                 android:layout_weight="1"
                 android:gravity="right|center_vertical"
-                android:text="TextView"
+                android:text="清空"
                 android:textColor="@android:color/background_light"
                 android:textSize="18sp"
-                android:textStyle="bold"
+                android:textStyle="normal"
                 android:visibility="gone" />
 
-            <Button
-                android:id="@+id/selectAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:text="全选"
-                android:textSize="15sp"
-                android:visibility="gone" />
         </LinearLayout>
 
     </android.support.design.widget.AppBarLayout>

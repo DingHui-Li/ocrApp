@@ -79,9 +79,9 @@ public class MainActivity extends AppCompatActivity
     private static final int UPLOADCOMPLETED = 0;
     private static final int ANALYSISCOMPLETED = 1;
     private static final int CONNERROR = 2;
-    public static final String APP_ID = "15093641";
-    public static final String API_KEY = "WCV9kiiNt56CY7ViOMlr0GZy";
-    public static final String SECRET_KEY = "mBOGT8HBqi7nrumDntENhsRX1tGGSURx";
+    public static String APP_ID = "15093641";
+    public static String API_KEY = "WCV9kiiNt56CY7ViOMlr0GZy";
+    public static String SECRET_KEY = "mBOGT8HBqi7nrumDntENhsRX1tGGSURx";
     public static final AipOcr client = new AipOcr(APP_ID, API_KEY, SECRET_KEY);
     public AlertDialog ad;
     public String targetLanguage="中文";
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity
                         JSONObject jo=JSONObject.parseObject(item.toString());
                         lines+=jo.getString("words")+"\n     ";
                     }
-                    EditText tv=findViewById(R.id.editText);
+                    TextView tv=findViewById(R.id.showText);
                     tv.setText(lines);
                     markContent=lines;
                     DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -150,31 +150,33 @@ public class MainActivity extends AppCompatActivity
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder ab=new AlertDialog.Builder(MainActivity.this);
-                View view =View.inflate(MainActivity.this, R.layout.loading, null);
-                ab.setView(view);
-                ad=ab.create();
-                ad.setCancelable(false);
-                ad.show();
                 try {
                     ImageView iv3=findViewById(R.id.imageView3);
                     iv3.setDrawingCacheEnabled(true);
                     Bitmap bt = Bitmap.createBitmap(iv3.getDrawingCache());
                     iv3.setDrawingCacheEnabled(false);
                     final File file=Bitmap2File(bt);
-                    histCoverFilePath=file.getAbsolutePath();
-                    final byte[] byteArray=new byte[(int)file.length()];
-                    FileInputStream fis=new FileInputStream(file);
-                    fis.read(byteArray);
-                    fis.close();
-                   Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            if(dataSource.equals("opencv")) uploadFile(file);
-                            else if(dataSource.equals("百度Api")) baiduAPi(byteArray);
-                        }
-                    };
-                    new Thread(runnable).start();
+                    if(file!=null) {
+                        AlertDialog.Builder ab=new AlertDialog.Builder(MainActivity.this);
+                        View view =View.inflate(MainActivity.this, R.layout.loading, null);
+                        ab.setView(view);
+                        ad=ab.create();
+                        ad.setCancelable(false);
+                        ad.show();
+                        histCoverFilePath = file.getAbsolutePath();
+                        final byte[] byteArray = new byte[(int) file.length()];
+                        FileInputStream fis = new FileInputStream(file);
+                        fis.read(byteArray);
+                        fis.close();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                if (dataSource.equals("opencv")) uploadFile(file);
+                                else if (dataSource.equals("百度Api")) baiduAPi(byteArray);
+                            }
+                        };
+                        new Thread(runnable).start();
+                    }
                 }catch(Exception e){
                 }
             }
@@ -314,28 +316,56 @@ public class MainActivity extends AppCompatActivity
         et1.setText(port+"");
         final EditText et2=findViewById(R.id.editIP);
         et2.setText(ip);
-        Button btn2=findViewById(R.id.button);
+        final EditText et3=findViewById(R.id.app_id);
+        et3.setText(APP_ID);
+        final EditText et4=findViewById(R.id.api_key);
+        et4.setText(API_KEY);
+        final EditText et5=findViewById(R.id.secret_key);
+        et5.setText(SECRET_KEY);
+        Button btn2=findViewById(R.id.setBtn);
         btn2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(((Button)v).getText()=="修改") {
+                if(((Button)v).getText().equals("修改")) {
                     v.setBackgroundColor(Color.argb(255, 33, 150, 243));
                     ((Button) v).setText("确定");
                     et1.setEnabled(true);
                     et2.setEnabled(true);
+                    et3.setEnabled(true);
+                    et4.setEnabled(true);
+                    et5.setEnabled(true);
                 }
                 else{
-                    ip=et2.getText().toString();
-                    try {
-                        port = Integer.parseInt(et1.getText().toString());
-                        v.setBackgroundColor(Color.parseColor("#ffd6d7d7"));
-                        ((Button) v).setText("修改");
-                        et1.setEnabled(false);
-                        et2.setEnabled(false);
-                        writeConfigFile();
-                    }catch(Exception e){
-                        Toast.makeText(MainActivity.this,"请输入数字",Toast.LENGTH_SHORT).show();
-                    }
+                    AlertDialog.Builder ab=new AlertDialog.Builder(MainActivity.this);
+                    ab.setTitle("确认修改?");
+                    ab.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                ip=et2.getText().toString();
+                                port = Integer.parseInt(et1.getText().toString());
+                                APP_ID=et3.getText().toString();
+                                API_KEY=et4.getText().toString();
+                                SECRET_KEY=et5.getText().toString();
+                                Button btn=findViewById(R.id.setBtn);
+                                btn.setBackgroundColor(Color.parseColor("#ffd6d7d7"));
+                                btn.setText("修改");
+                                et1.setEnabled(false);
+                                et2.setEnabled(false);
+                                et3.setEnabled(false);
+                                et4.setEnabled(false);
+                                et5.setEnabled(false);
+                                writeConfigFile();
+                            }catch(Exception e){
+                                Toast.makeText(MainActivity.this,"请输入数字",Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                    ab.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {}
+                    });
+                    ab.create().show();
                 }
             }
         });
@@ -345,15 +375,13 @@ public class MainActivity extends AppCompatActivity
         final List<Integer>selectItem=new ArrayList<>();
         final ListView lv=findViewById(R.id.historyList);
         final listAdapter la=new listAdapter(MainActivity.this,historyData);
-        final TextView selectNum=findViewById(R.id.selectNum);
-        final Button selectAll=findViewById(R.id.selectAll);
-        selectAll.setTag("selectAll");
+        final TextView clearHis=findViewById(R.id.clearHis);
+        clearHis.setVisibility(View.VISIBLE);
         if(historyData!=null){
             lv.setAdapter(la);
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if(!la.isChoice) {
                         View camera_main = findViewById(R.id.include1);
                         View history_main = findViewById(R.id.include_history);
                         Toolbar tb=findViewById(R.id.toolbar);
@@ -368,74 +396,49 @@ public class MainActivity extends AppCompatActivity
                         histCoverFilePath = historyData.get(position).getCover();
                         markContent = historyData.get(position).getContent();
                         Glide.with(MainActivity.this).load(file).into(iv);
-                        EditText et = findViewById(R.id.editText);//显示结果的文本框
+                        TextView et = findViewById(R.id.showText);//显示结果的文本框
                         View cv = findViewById(R.id.showCard);//显示结果的Card
                         cv.setVisibility(View.VISIBLE);
                         et.setText(historyData.get(position).getContent());
                         ImageView markiv = findViewById(R.id.markBtn);//收藏按钮
                         markiv.setTag("mark");
                         markiv.setBackgroundResource(R.drawable.mark);
-                    }else{
-                        View item= lv.getChildAt(position);
-                        if(item.getTag().equals("selected")){
-                            item.setTag("select");
-                            item.setBackgroundColor(Color.WHITE);
-                            for(int i=0;i<selectItem.size();i++){
-                                if(selectItem.get(i)==position){
-                                    selectItem.remove(i);
-                                    break;
-                                }
-                            }
-                        }else{
-                            item.setTag("selected");
-                            item.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                            selectItem.add(position);
-                        }
-                        if(selectItem.size()==0){
-                            la.isChoice=false;
-                            fab.setVisibility(View.GONE);
-                            selectAll.setVisibility(View.GONE);
-                            selectNum.setVisibility(View.GONE);
-                        }
-                        selectNum.setText(selectItem.size()+"");
+                        clearHis.setVisibility(View.GONE);
                     }
-                }
             });
             lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                    View item= lv.getChildAt(position);
-                    item.setTag("selected");
-                    la.isChoice=true;
-                    item.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                    selectItem.add(position);
-                    fab.setVisibility(View.VISIBLE);
-                    selectAll.setVisibility(View.VISIBLE);
-                    selectNum.setVisibility(View.VISIBLE);
-                    selectNum.setText(selectItem.size()+"");
-                    return true;
-                }
-            });
-        }
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(selectItem!=null){
-                     AlertDialog.Builder ab=new AlertDialog.Builder(MainActivity.this);
+                  // Toast.makeText(MainActivity.this,position+"",Toast.LENGTH_SHORT).show();
+                    AlertDialog.Builder ab=new AlertDialog.Builder(MainActivity.this);
                     ab.setTitle("确认删除?");
                     ab.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            for(int i : selectItem){
-                                historyData.remove(i);
-                            }
-                              selectItem.clear();
-                              la.notifyDataSetChanged();
-                              writeConfigFile();
-                              la.isChoice=false;
-                              fab.setVisibility(View.GONE);
-                              selectAll.setVisibility(View.GONE);
-                              selectNum.setVisibility(View.GONE);
+                            historyData.remove(position);
+                            la.notifyDataSetChanged();
+                            writeConfigFile();
+                        }
+                    });
+                    ab.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {}
+                    });
+                    ab.create().show();
+                    return true;
+                }
+            });
+            clearHis.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder ab=new AlertDialog.Builder(MainActivity.this);
+                    ab.setTitle("确认清空?");
+                    ab.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            historyData.clear();
+                            la.notifyDataSetChanged();
+                            writeConfigFile();
                         }
                     });
                     ab.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -444,51 +447,19 @@ public class MainActivity extends AppCompatActivity
                     });
                     ab.create().show();
                 }
-            }
-        });
-        selectAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(selectAll.getTag().equals("selectAll")){
-                    selectAll.setTag("selectedAll");
-                    selectAll.setText("取消全选");
-                    selectItem.clear();
-                    for(int i=0;i<historyData.size();i++){
-                        selectItem.add(i);
-                        lv.getChildAt(i).setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                        lv.getChildAt(i).setTag("selected");
-                    }
-                }else{
-                    selectAll.setTag("selectAll");
-                    selectAll.setText("全选");
-                    selectItem.clear();
-                    for(int i=0;i<historyData.size();i++){
-                        lv.getChildAt(i).setBackgroundColor(Color.WHITE);
-                        lv.getChildAt(i).setTag("select");
-                    }
-                    la.isChoice=false;
-                    fab.setVisibility(View.GONE);
-                    selectAll.setVisibility(View.GONE);
-                    selectNum.setVisibility(View.GONE);
-                }
-                selectNum.setText(selectItem.size()+"");
-            }
-        });
+            });
+        }
     }
     public void markViewInit(){
         final FloatingActionButton fab=findViewById(R.id.mark_fab);
         final List<Integer>selectItem=new ArrayList<>();
         final ListView lv=findViewById(R.id.markList);
         final listAdapter la=new listAdapter(MainActivity.this,markData);
-        final TextView selectNum=findViewById(R.id.selectNum);
-        final Button selectAll=findViewById(R.id.selectAll);
-        selectAll.setTag("selectAll");
         if(markData!=null) {
             lv.setAdapter(la);
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if(!la.isChoice) {
                         View camera_main = findViewById(R.id.include1);
                         View mark_main = findViewById(R.id.include2);
                         Toolbar tb=findViewById(R.id.toolbar);
@@ -503,74 +474,26 @@ public class MainActivity extends AppCompatActivity
                         histCoverFilePath = markData.get(position).getCover();
                         markContent = markData.get(position).getContent();
                         Glide.with(MainActivity.this).load(file).into(iv);
-                        EditText et = findViewById(R.id.editText);//显示结果的文本框
+                        TextView et = findViewById(R.id.showText);//显示结果的文本框
                         View cv = findViewById(R.id.showCard);//显示结果的Card
                         cv.setVisibility(View.VISIBLE);
                         et.setText(markData.get(position).getContent());
                         ImageView markiv = findViewById(R.id.markBtn);//收藏按钮
                         markiv.setTag("mark");
                         markiv.setBackgroundResource(R.drawable.mark);
-                    }else{
-                        View item= lv.getChildAt(position);
-                        if(item.getTag().equals("selected")){
-                            item.setTag("select");
-                            item.setBackgroundColor(Color.WHITE);
-                            for(int i=0;i<selectItem.size();i++){
-                                if(selectItem.get(i)==position){
-                                    selectItem.remove(i);
-                                    break;
-                                }
-                            }
-                        }else{
-                            item.setTag("selected");
-                            item.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                            selectItem.add(position);
-                        }
-                        if(selectItem.size()==0){
-                            la.isChoice=false;
-                            fab.setVisibility(View.GONE);
-                            selectAll.setVisibility(View.GONE);
-                            selectNum.setVisibility(View.GONE);
-                        }
-                        selectNum.setText(selectItem.size()+"");
-                    }
                 }
             });
             lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                    View item= lv.getChildAt(position);
-                    item.setTag("selected");
-                    la.isChoice=true;
-                    item.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                    selectItem.add(position);
-                    fab.setVisibility(View.VISIBLE);
-                    selectAll.setVisibility(View.VISIBLE);
-                    selectNum.setVisibility(View.VISIBLE);
-                    selectNum.setText(selectItem.size()+"");
-                    return true;
-                }
-            });
-        }
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(selectItem!=null){
                     AlertDialog.Builder ab=new AlertDialog.Builder(MainActivity.this);
                     ab.setTitle("确认删除?");
                     ab.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            for(int i : selectItem){
-                                markData.remove(i);
-                            }
-                            selectItem.clear();
+                            markData.remove(position);
                             la.notifyDataSetChanged();
                             writeConfigFile();
-                            la.isChoice=false;
-                            fab.setVisibility(View.GONE);
-                            selectAll.setVisibility(View.GONE);
-                            selectNum.setVisibility(View.GONE);
                         }
                     });
                     ab.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -578,38 +501,10 @@ public class MainActivity extends AppCompatActivity
                         public void onClick(DialogInterface dialog, int which) {}
                     });
                     ab.create().show();
+                    return true;
                 }
-            }
-        });
-        selectAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(selectAll.getTag().equals("selectAll")){
-                    selectAll.setTag("selectedAll");
-                    selectAll.setText("取消全选");
-                    selectItem.clear();
-                    for(int i=0;i<markData.size();i++){
-                        selectItem.add(i);
-                        lv.getChildAt(i).setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                        lv.getChildAt(i).setTag("selected");
-                    }
-                }else{
-                    selectAll.setTag("selectAll");
-                    selectAll.setText("全选");
-                    selectItem.clear();
-                    for(int i=0;i<markData.size();i++){
-                        lv.getChildAt(i).setBackgroundColor(Color.WHITE);
-                        lv.getChildAt(i).setTag("select");
-                    }
-                    la.isChoice=false;
-                    fab.setVisibility(View.GONE);
-                    selectAll.setVisibility(View.GONE);
-                    selectNum.setVisibility(View.GONE);
-                }
-                selectNum.setText(selectItem.size()+"");
-            }
-        });
-
+            });
+        }
     }
     public void aboutViewInit(){
        final TextView tv=findViewById(R.id.textView6);
@@ -627,6 +522,9 @@ public class MainActivity extends AppCompatActivity
         Map<String,String> var=new HashMap<>();
         var.put("ip",ip);
         var.put("port",port+"");
+        var.put("APP_ID",APP_ID);
+        var.put("API_KEY",API_KEY);
+        var.put("SECRET_KEY",SECRET_KEY);
         var.put("targetLanguage",targetLanguage);
         var.put("dataSource",dataSource);
         String history_list2string=JSON.toJSONString(historyData);
@@ -669,6 +567,9 @@ public class MainActivity extends AppCompatActivity
                 port = Integer.parseInt(jo.getString("port"));
                 targetLanguage=jo.getString("targetLanguage");
                 dataSource=jo.getString("dataSource");
+                APP_ID=jo.getString("APP_ID");
+                API_KEY=jo.getString("API_KEY");
+                SECRET_KEY=jo.getString("SECRET_KEY");
                 historyData=JSONObject.parseArray(jo.getString("historyData"),list_item.class);
                 markData=JSONObject.parseArray(jo.getString("markData"),list_item.class);
 
@@ -765,6 +666,8 @@ public class MainActivity extends AppCompatActivity
                 history.setVisibility(View.VISIBLE);
                 history.startAnimation(AnimationUtils.loadAnimation(MainActivity.this,R.anim.slide_in_left));
                 tb.setTitle("历史记录");
+                final TextView clearHis=findViewById(R.id.clearHis);
+                clearHis.setVisibility(View.VISIBLE);
             }
             else if(tb.getTitle().equals("收藏(详情)")){
                 View home=findViewById(R.id.include1);
@@ -797,14 +700,17 @@ public class MainActivity extends AppCompatActivity
         views.add(findViewById(R.id.include_set));
         views.add(findViewById(R.id.include_history));
         views.add(findViewById(R.id.include_about));
+        TextView clearHis=findViewById(R.id.clearHis);
         int id = item.getItemId();
         if (id == R.id.nav_camera) {
            switch_view(views,findViewById(R.id.include1));
            tb.setTitle("首页");
+           clearHis.setVisibility(View.GONE);
         } else if (id == R.id.nav_mark) {
             switch_view(views,findViewById(R.id.include2));
             tb.setTitle("收藏");
             markViewInit();
+            clearHis.setVisibility(View.GONE);
         } else if (id == R.id.nav_history) {
             switch_view(views,findViewById(R.id.include_history));
             tb.setTitle("历史记录");
@@ -812,10 +718,12 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_set) {
             tb.setTitle("设置");
             switch_view(views,findViewById(R.id.include_set));
+            clearHis.setVisibility(View.GONE);
         } else if (id == R.id.nav_about) {
             tb.setTitle("关于");
             switch_view(views,findViewById(R.id.include_about));
             aboutViewInit();
+            clearHis.setVisibility(View.GONE);
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -859,7 +767,8 @@ public class MainActivity extends AppCompatActivity
             } catch (Exception e) {
                 e.printStackTrace();
               }
-
+        }else{
+            ad.dismiss();
         }
     }
     public void recvData(){
