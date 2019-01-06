@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity
         readConfigFile();
         AlertDialog.Builder ab=new AlertDialog.Builder(this);
         ab.setTitle("提示");
-        ab.setMessage("第一次使用请到设置打开该程序的存储权限");
+        ab.setMessage("第一次使用请到设置打开该程序的存储权限,否则选取图片时会发生闪退");
         ab.create().show();
         Button btn=findViewById(R.id.submit);//提交按钮
         btn.setOnClickListener(new View.OnClickListener() {
@@ -452,9 +452,6 @@ public class MainActivity extends AppCompatActivity
                 }
             });
         }
-        AlertDialog.Builder ab=new AlertDialog.Builder(MainActivity.this);
-        ab.setMessage("李定辉\n2016030403112");
-        ab.create().show();
     }
     public void markViewInit(){
         final FloatingActionButton fab=findViewById(R.id.mark_fab);

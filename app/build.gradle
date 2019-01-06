@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'key0'
+            keyPassword 'sad123'
+            storeFile file('F:/code/android/ocrApp.jks')
+            storePassword 'sad123'
+        }
+    }
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.main.ocrapp"
@@ -14,6 +22,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 }
