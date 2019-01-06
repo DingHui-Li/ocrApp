@@ -96,7 +96,6 @@ public class MainActivity extends AppCompatActivity
         public  void handleMessage(Message msg){
             switch(msg.what){
                 case UPLOADCOMPLETED:
-                    ad.dismiss();
                     Toast.makeText(MainActivity.this,"上传成功",Toast.LENGTH_SHORT).show();
                     Runnable runnable2=new Runnable() {
                         @Override
@@ -146,6 +145,10 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         readConfigFile();
+        AlertDialog.Builder ab=new AlertDialog.Builder(this);
+        ab.setTitle("提示");
+        ab.setMessage("第一次使用请到设置打开该程序的存储权限");
+        ab.create().show();
         Button btn=findViewById(R.id.submit);//提交按钮
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -449,6 +452,9 @@ public class MainActivity extends AppCompatActivity
                 }
             });
         }
+        AlertDialog.Builder ab=new AlertDialog.Builder(MainActivity.this);
+        ab.setMessage("李定辉\n2016030403112");
+        ab.create().show();
     }
     public void markViewInit(){
         final FloatingActionButton fab=findViewById(R.id.mark_fab);
@@ -766,6 +772,9 @@ public class MainActivity extends AppCompatActivity
                 handler.sendMessage(msg);
             } catch (Exception e) {
                 e.printStackTrace();
+                Message msg=new Message();
+                msg.what=CONNERROR;
+                handler.sendMessage(msg);
               }
         }else{
             ad.dismiss();
@@ -779,10 +788,12 @@ public class MainActivity extends AppCompatActivity
                 BufferedReader br = null;
                 br = new BufferedReader(new InputStreamReader(socket.getInputStream(),"UTF-8"));
                 String line = br.readLine();
+                JSONObject jsn= JSONObject.parseObject(line);
+                System.out.println(jsn);
                 if (line != null) {
                     msg.what = ANALYSISCOMPLETED;
                     Bundle bundle = new Bundle();
-                    bundle.putString("data", line);
+                    bundle.putString("data", jsn.getString("words_result"));
                     br.close();
                     msg.setData(bundle);
                     handler.sendMessage(msg);
